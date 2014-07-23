@@ -35,21 +35,31 @@ EnableExplicit
 #FNAME = "practice.txt"
 
 ;#SEED = $nnnnn
-#COLS = 5
+#COLS = 6
 #ROWS = 50
 
-#FLD0_WIDTH = 6
-#FLD0_MAX = 99999
-#FLD0_MIN = 2
+#FLD0_DIGRNGMIN = 2
+#FLD0_DIGRNGMAX = 2
+#FLD0_WIDTH     = #FLD0_DIGRNGMAX+1
+#FLD0_DIG0 = "05"
+#FLD0_DIG1 = "123456789"
+#FLD0_DIG2 = "123456789"
+#FLD0_DIG3 = "123456789"
+#FLD0_DIG4 = "123456789"
+#FLD0_DIG5 = "123456789"
 
-;#OP_ADD  = "+"
-;#OP_SUB  = "-"
-#OP_MULT = "*"
-;#OP_DIV  = "/"
+#OPS = "+-/*"
 
-#FLD1_WIDTH = 3
-#FLD1_MAX = 11
-#FLD1_MIN = 11
+#FLD1_DIGRNGMIN = 2
+#FLD1_DIGRNGMAX = 3
+#FLD1_WIDTH     = #FLD1_DIGRNGMAX+1
+#FLD1_DIG0 = "135"
+#FLD1_DIG1 = "123456789"
+#FLD1_DIG2 = "123456789"
+#FLD1_DIG3 = "123456789"
+#FLD1_DIG4 = "123456789"
+#FLD1_DIG5 = "123456789"
+
 ;-------------------------------------------
 
 Global.i seed
@@ -68,27 +78,9 @@ CompilerElse
 CompilerEndIf
 RandomSeed( seed )
 
-Global.s ops
-Global.i opcnt
-CompilerIf Defined( OP_ADD, #PB_Constant )
-  ops+#OP_ADD
-  opcnt+1
-CompilerEndIf
-CompilerIf Defined( OP_SUB, #PB_Constant )
-  ops+#OP_SUB
-  opcnt+1
-CompilerEndIf
-CompilerIf Defined( OP_MULT, #PB_Constant )
-  ops+#OP_MULT
-  opcnt+1
-CompilerEndIf
-CompilerIf Defined( OP_DIV, #PB_Constant )
-  ops+#OP_DIV
-  opcnt+1
-CompilerEndIf
-
+Global.i opcnt = Len(#OPS)
 Procedure.s op( )
-  ProcedureReturn Mid( ops, Random(opcnt,1), 1 )
+  ProcedureReturn Mid( #OPS, Random(opcnt,1), 1 )
 EndProcedure
 
 Procedure.s params( )
@@ -104,15 +96,59 @@ Procedure.s params( )
   CompilerEndSelect
   
   ProcedureReturn "file: "+#FNAME+", "+
-                    "ops: "+ops+", "+
+                    "ops: "+#OPS+", "+
                     "seed: "+sstr+", "+
                     "#:"+Str(#ROWS*#COLS)
 EndProcedure
 
+
 Procedure.s problem( )
-  ProcedureReturn "["+RSet(StrU(Random(#FLD0_MAX, #FLD0_MIN)), #FLD0_WIDTH)+
-                    " "+op()+" "+
-                    LSet(StrU(Random(#FLD1_MAX, #FLD1_MIN)), #FLD1_WIDTH)+"]"
+  Protected.i digrng
+  Protected.s problem, fld
+  
+  ; brute force first field
+  digrng = Random( #FLD0_DIGRNGMAX, #FLD0_DIGRNGMIN )
+  If digrng>5
+    fld + Mid( #FLD0_DIG5, Random(Len(#FLD0_DIG5),1), 1 )
+  EndIf
+  If digrng>4
+    fld + Mid( #FLD0_DIG4, Random(Len(#FLD0_DIG4),1), 1 )
+  EndIf
+  If digrng>3
+    fld + Mid( #FLD0_DIG3, Random(Len(#FLD0_DIG3),1), 1 )
+  EndIf
+  If digrng>2
+    fld + Mid( #FLD0_DIG2, Random(Len(#FLD0_DIG2),1), 1 )
+  EndIf
+  If digrng>1
+    fld + Mid( #FLD0_DIG1, Random(Len(#FLD0_DIG1),1), 1 )
+  EndIf
+  fld + Mid( #FLD0_DIG0, Random(Len(#FLD0_DIG0),1), 1 )
+  problem = "["+RSet(fld, #FLD0_WIDTH)
+  ; op
+  problem + " "+op()+" "
+  ; brute force second field
+  digrng = Random( #FLD1_DIGRNGMAX, #FLD1_DIGRNGMIN )
+  fld = ""
+  If digrng>5
+    fld + Mid( #FLD1_DIG5, Random(Len(#FLD1_DIG5),1), 1 )
+  EndIf
+  If digrng>4
+    fld + Mid( #FLD1_DIG4, Random(Len(#FLD1_DIG4),1), 1 )
+  EndIf
+  If digrng>3
+    fld + Mid( #FLD1_DIG3, Random(Len(#FLD1_DIG3),1), 1 )
+  EndIf
+  If digrng>2
+    fld + Mid( #FLD1_DIG2, Random(Len(#FLD1_DIG2),1), 1 )
+  EndIf
+  If digrng>1
+    fld + Mid( #FLD1_DIG1, Random(Len(#FLD1_DIG1),1), 1 )
+  EndIf
+  fld + Mid( #FLD1_DIG0, Random(Len(#FLD1_DIG0),1), 1 )
+  problem + LSet(fld, #FLD1_WIDTH)+"]"
+  
+  ProcedureReturn problem              
 EndProcedure
 
 #FILE = 0
@@ -136,8 +172,8 @@ If CreateFile( #FILE, #FNAME )
   CloseFile( #FILE )
 EndIf
 ; IDE Options = PureBasic 5.22 LTS (Windows - x64)
-; CursorPosition = 14
-; FirstLine = 4
+; CursorPosition = 42
+; FirstLine = 32
 ; Folding = -
 ; EnableUnicode
 ; EnableXP
